@@ -1,0 +1,42 @@
+.loginPanel{
+    background-color: #FFFFFF;
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+
+    box-shadow: 0.3em 0.3em 1em rgb(0 0 0 / 20%);
+}
+.textWarp{
+    width: 100%;
+    display: flex;
+    align-content: flex-start;
+    margin-bottom: 50px;
+}
+
+.loginContent{
+    margin-top: 25px;
+    margin-left: 35px;
+    margin-right: 35px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+.loginText{
+    font-size: 40px;
+}
+.loginBtn{
+    width: 100%;
+}
+
+
+
+.el-col{
+    margin-top: 10px;
+}
+.inputhint{
+    margin-left: 18px;
+}
