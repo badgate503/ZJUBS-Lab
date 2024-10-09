@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,7 +46,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    #"django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -123,6 +124,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "/bbj_frontend/dist/static"),
+# ]
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -130,10 +135,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:5173',]
 
+
+
 CORS_ORIGIN_ALLOW_ALL = True
 
-SESSION_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
 # 允许的请求头
+
+CSRF_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_HTTPONLY = False
+
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOW_HEADERS = (
     "accept",
     "accept-encoding",

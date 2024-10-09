@@ -144,6 +144,7 @@
 import axios from "axios";
 import "../assets/LoginPage.css";
 
+import Qs from 'qs';
 
 
 export default {
@@ -164,6 +165,9 @@ export default {
     }
   },
   methods: {
+
+
+
     isEmail(str){
       var reg = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
       return reg.test(str);
@@ -187,13 +191,20 @@ export default {
         ElMessage.error('请输入密码')
         return
       }
-      axios.post("/api/login",{
-        "username":this.logInfo.email,
-        "pwd":this.logInfo.password
+      let data = new FormData()
+      data.append('username',this.logInfo.email)
+      data.append('password',this.logInfo.password)
+      axios.post("/api/login",data,{
+        withCredentials: true,
+        headers: {
+          "content-type": "application/json",
+          'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+        }
       }).then(response => {
         console.log(response.data['isLoginOK'])
         if(response.data['isLoginOK']) {
           ElMessage.success(response.data['userName']+'，欢迎回来！')
+          this.$router.push('/index')
         } else {
           ElMessage.error('用户不存在或密码错误')
         }
@@ -233,9 +244,16 @@ export default {
         "username":this.logInfo.email,
         "pwd":this.logInfo.password,
         "nickname":this.logInfo.nickname
+      },{
+        withCredentials: true,
+        headers: {
+          "content-type": "application/json",
+          'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+        }
       }).then(response => {
         if(response.data['isRegisterOK']) {
           ElMessage.success('成功注册')
+          this.$router.push('/index')
         } else {
           ElMessage.error('该邮箱已注册')
         }
