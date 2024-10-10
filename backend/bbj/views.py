@@ -67,8 +67,7 @@ def register(request):
 
 def checkLoginState(request):
     current_user = request.user
-    print(request.user.first_name)
-    if(current_user.is_anonymous):
+    if current_user.is_anonymous:
         data={
             'isLogged': False,
             'userName': 'Anonymous',
@@ -81,4 +80,8 @@ def checkLoginState(request):
             'userEmail': current_user.username
         }
         return HttpResponse(json.dumps(data))
+
+def logout(request):
+    auth.logout(request)
+    return HttpResponse("OK")
 

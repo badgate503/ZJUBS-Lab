@@ -7,12 +7,24 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import LoginPage from "./components/LoginPage.vue";
 import MainPage from "./components/MainPage.vue";
+import UserView from "./components/UserView.vue"
+import FrontView from "./components/FrontView.vue"
 
 
 const routes = [
-    {path: '/', redirect: '/login'},
+    {path: '/', redirect: '/index'},
     {path:'/login', component: LoginPage},
-    {path:'/index', component: MainPage},
+    {path:'/index', component: MainPage, children: [
+            {path: '', redirect: '/front'},
+            {
+                path: '/user',
+                component: UserView,
+            },
+            {
+                path: '/front',
+                component: FrontView,
+            },
+        ]},
 ]
 const router = createRouter({
     history:createMemoryHistory(),

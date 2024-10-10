@@ -12,10 +12,10 @@ axios.get("/api/checkLoginState", {
   }
 }).then(res=>{
   console.log(res)
-  if(res.data["isLogged"]){
-    router.push('/index')
-  } else {
+  if(!res.data["isLogged"]){
     router.push('/login')
+  } else {
+    router.push('/index')
   }
 
 })
@@ -25,9 +25,8 @@ axios.get("/api/checkLoginState", {
 </script>
 
 <template>
-  <div class="main">
-    <RouterView />
-  </div>
+  <RouterView />
+
 
 </template>
 

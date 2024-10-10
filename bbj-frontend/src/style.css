@@ -59,9 +59,9 @@ button:focus-visible {
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  text-align: center;
+display: flex;
+  align-items: stretch;
+
 }
 
 @media (prefers-color-scheme: light) {

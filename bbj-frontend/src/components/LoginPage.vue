@@ -1,6 +1,7 @@
 <script setup> </script>
 
 <template>
+  <div class="login-main" >
   <div class="loginPanel">
     <transition name="el-fade-in">
     <div v-show="isLogin" class="loginContent">
@@ -130,6 +131,7 @@
       </el-col>
     </div>
     </transition>
+  </div>
   </div>
 
 </template>
