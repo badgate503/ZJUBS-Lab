@@ -24,6 +24,10 @@ const routes = [
                 path: '/front',
                 component: FrontView,
             },
+            {
+                path: '/collect',
+                component: CollectionView,
+            },
         ]},
 ]
 const router = createRouter({
@@ -33,6 +37,7 @@ const router = createRouter({
 import {ElMessage} from "element-plus";
 import { Message } from '@element-plus/icons-vue'
 import VueCookie from 'vue-cookies'
+import CollectionView from "./components/CollectionView.vue";
 
 
 

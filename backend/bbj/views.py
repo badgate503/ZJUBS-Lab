@@ -6,11 +6,22 @@ from django.contrib.auth import login
 from django.contrib.auth.models import AnonymousUser
 from django.db import IntegrityError
 from django.middleware.csrf import get_token ,rotate_token
+from django.core.mail import send_mail
 
 import json
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world.")
+
+def send_email(request):
+    send_mail(
+        subject='欢迎注册比比价',
+        message='您的验证码为 114514',
+        from_email='bibijia1011@163.com',
+        recipient_list=[request.user.username],
+        fail_silently=False
+    )
+    return HttpResponse('OK')
 
 
 def login(request):
