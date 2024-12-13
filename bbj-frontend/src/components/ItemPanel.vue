@@ -1,26 +1,24 @@
-
-
 <template>
   <div class="collection-main">
 
-    <el-card shadow="always"class="coll-container">
+    <el-card  shadow="always"class="coll-container">
+      <div class="img-cont">
+        <img :src="info.img">
+      </div>
       <div class="name-price">
         <div class="name-icon">
-          <el-icon size="large"><Discount /></el-icon><div class="item-name">{{ name }}</div>
+          <el-icon size="large"><Discount /></el-icon><div class="item-name">{{ info.name }}</div>
         </div>
-        <div class="price">¥{{ minPrice }} ~ ¥{{maxPrice}}</div>
+
       </div>
-      <div class="item-info">
-        <div class="item-num">共找到商品 {{num}} 件</div>
+      <div class="price-cont">
+        <div class="price">¥{{info.price}}</div>
+        <div class="operations">
+          <el-button @click="onClick" type="warning">跳转淘宝页面</el-button>
+        </div>
       </div>
-      <div class="operations">
-        <el-button-group>
-          <el-button type="warning">查看详情</el-button>
-          <el-button type="primary">
-            取消收藏
-          </el-button>
-        </el-button-group>
-      </div>
+
+
 
 
 
@@ -31,43 +29,56 @@
 
   </div>
 </template>
-<script>
 
+<script>
 import axios from "axios";
 import ECharts from "vue-echarts";
 export default {
   data() {
     return {
-      name: "iPhone 16",
-      minPrice: 1000,
-      maxPrice: 5000,
-      num: 100,
+
     }
+  },
+  props: {
+    info:Object,
   },
   methods: {
     onClick() {
-      axios.get('/api/send_email')
+      window.location.href= this.info.link
     }
   },
 
 }
-
 </script>
+
 <style scoped>
+.img-cont{
+  width: 100%;
+}
+.img-cont img{
+  width: 100%;
+}
 
 .coll-container{
   margin-left: 20px;
   margin-top: 20px;
-  width: 30%;
+  width: 100%;
 }
 .switch-tab{
   margin-top: 10px;
 }
 .item-name{
-  font-size: large;
-  margin-left: 5px;
+  font-size: medium;
+  margin-left: 10px;
 }
 .name-price{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.price-cont{
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -79,6 +90,7 @@ export default {
   align-items: center;
 }
 .price{
+  margin-top: 10px;
   font-size: x-large;
   color: #cf2020;
 }

@@ -10,6 +10,9 @@ import MainPage from "./components/MainPage.vue";
 import UserView from "./components/UserView.vue"
 import FrontView from "./components/FrontView.vue"
 
+import * as echarts from  'echarts'
+import VueECharts from 'vue-echarts'
+
 
 const routes = [
     {path: '/', redirect: '/index'},
@@ -48,6 +51,6 @@ const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
-
+app.component('v-chart', VueECharts)
 axios.defaults.baseURL = 'http://localhost:8000';
 app.use(VueCookie).use(router).mount('#app')

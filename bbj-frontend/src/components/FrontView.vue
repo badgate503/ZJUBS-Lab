@@ -1,28 +1,55 @@
 <script setup>
-
+import ItemPanel from "./ItemPanel.vue";
+import ItemList from "./ItemList.vue";
 </script>
 
 <template>
   <div class="front">
     <div class="logo-search">
-      <img class="logo-img"alt="logo" src="../assets/logo_txt.svg"></img>
+      <el-collapse-transition>
+        <img  v-show="logoShow" class="logo-img" alt="logo" src="../assets/logo_txt.svg"></img>
+      </el-collapse-transition>
+
       <div class="search-bar">
 
         <div class="search-bar-cont">
 
           <el-input
               class="search-bar-bar"
-              v-model="input1"
+              @click="onSearch"
+              @blur ="onAbortSearch"
+              v-model="searchQuery"
               style="width: 600px"
               size="large"
               clearable
-              placeholder="Please Input"
+              placeholder="搜一搜"
           />
-          <el-button  class="search-btn" size="large" type="primary"><el-icon size="large"><Search/></el-icon></el-button>
+          <el-button @click="onSearchSubmit" class="search-btn" size="large" type="primary"><el-icon size="large"><Search/></el-icon></el-button>
 
         </div>
 
       </div>
+
+    </div>
+    <el-divider style="margin-top: 60px" ></el-divider>
+    <transition name="el-fade-in">
+      <div v-show="!logoShow">
+
+        <el-empty v-show="searchNotSubmit" description="请输入想找的东西" />
+        <el-empty v-show="!searchNotSubmit && !searchHasResult" description="未找到任何商品" />
+
+        <div v-loading="loading"  class="item-list">
+          <div class="item-container" v-for="item in searchResult">
+            <ItemPanel :info="item"></ItemPanel>
+          </div>
+        </div>
+
+      </div>
+
+    </transition>
+
+    <div v-show="logoShow" class="lists-cont" v-for="item in ItemLists">
+      <ItemList :info="item" :fatherMethod="onClickItem" ></ItemList>
     </div>
 
   </div>
@@ -30,14 +57,93 @@
 
 <script>
 import axios from "axios";
+import ItemPanel from "./ItemPanel.vue";
 import {getCurrentUser} from "../utils.js";
 import { Search } from '@element-plus/icons-vue'
-
+import 'animate.css'
+import ItemList from "./ItemList.vue";
 export default {
   data() {
+    return{
+      logoShow:true,
+      searchQuery:"",
+      searchNotSubmit:true,
+      searchHasResult:true,
+      loading:false,
+      qr_src:"",
+      searchResult:[],
+      ItemLists:[{
+        title:"电脑整机",
+        list:["笔记本电脑","游戏本","平板电脑","DIY电脑","服务器/工作站","一体机","闺蜜机"]
+      },{
+        title:"电脑配件",
+        list:["显示器","CPU","主板","显卡","硬盘","内存","机箱","电源","散热","显示器","支架","光驱","声卡","装机配件","SSD固态硬盘","组装电脑","USB分线器","鼠标","键盘","网络仪表仪器","U盘","移动硬盘","摄像头","手写板","UPS电源","平板电脑配件","笔记本配件","投屏器","扩展坞"]
+      },{
+        title:"家具",
+        list:["床","床垫","沙发","茶几","电视柜","休闲椅","书架","鞋柜","餐桌","餐椅","餐边柜","酒柜","厨房","衣柜","梳妆台","穿衣镜","水槽","龙头","淋浴花洒","马桶","智能马桶","智能马桶盖","厨卫挂件","浴室柜","浴霸"]
+      },{
+        title:"流行服饰",
+        list:["当季热卖","新品推荐","商场同款","连衣裙","T恤","衬衫","外套","针织衫","风衣","西服","卫衣","马夹","大衣","皮衣/皮草","毛衣","羽绒服","休闲裤","牛仔裤","短裤","直筒裤","工装裤","西裤","运动裤","半身裙"]
+      },{
+        title:"办公耗材",
+        list:["投影机","打印机","传真设备","碎纸机","考勤门禁","收银机","保险柜","安防监控","订书机","票夹","大头针","美工刀","胶带","复写纸","号码机","印泥","账本","计算器"]
+      },{
+        title:"手机数码",
+        list:["新品手机","手机维修","AI手机","5G手机","游戏手机","学习手机","对讲机","手机壳","贴膜","手机存储卡","数据线","充电器","创意配件","手机饰品","手机支架","数码相机","微单相机","单反相机","拍立得","运动相机","胶卷相机","摄像机镜头"]
+      },{
+        title:"新鲜食品",
+        list:["饼干","蛋糕","糖/巧克力","方便食品","肉干","肉脯","营养零食","休闲零食","坚果炒货","蜜饯","果干","苹果","橙子","奇异果/猕猴桃","火龙果","榴莲","芒果","椰子","车厘子","百香果","柚子","国产水果","进口水果","猪肉","牛肉","羊肉","鸡肉","鸭肉","冷鲜肉","内脏类","冷藏熟食","牛排","牛腩","鸡翅"]
+      },{
+        title:"体育用品",
+        list:["乒乓球","羽毛球","篮球","足球","轮滑","滑板","网球","高尔夫","台球","排球","田径鞋"]
+      }]
+    }
 
+  },components: {
+    ItemList
   },
   methods: {
+    onSearch(){
+      this.logoShow = false;
+      this.searchHasResult = true;
+    },
+    onAbortSearch(){
+      if(this.searchQuery === ""){
+        this.logoShow = true;
+        this.searchHasResult = true;
+        this.searchResult = [];
+        this.searchNotSubmit = true;
+      }
+    },
+    onClickItem(itemname){
+      console.log(itemname)
+      this.onSearch()
+      this.searchQuery=itemname
+      this.onSearchSubmit()
+    },
+    onSearchSubmit(){
+      this.loading = true
+      this.searchNotSubmit = false
+      this.searchHasResult = true
+      axios.post("/api/tb_fetchItem",{
+        query_name:this.searchQuery
+      },{
+        withCredentials: true,
+        headers: {
+          "content-type": "application/json",
+          'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+        }
+      }).then(res=>{
+        console.log(res.data)
+        this.searchResult=res.data
+        this.searchNotSubmit = false;
+        if(res.data === null || res.data.length === 0) {
+          this.searchHasResult = false;
+        }
+        this.loading = false
+      })
+    },
+
     onClick() {
       axios.get('/api/send_email')
     }
@@ -55,17 +161,21 @@ export default {
 }
 .logo-img{
   width: 20vw;
+
+  margin-bottom: 5vh;
 }
 .front{
   width: 100%;
 }
 .search-bar{
+
   display: flex;
   width: 100%;
   justify-content: center;
   flex-direction: row;
-  margin-top: 5vh;
 }
+
+
 .search-bar-cont{
   display: flex;
   align-items: center;
@@ -75,6 +185,23 @@ export default {
   margin-left: 10px;
 }
 .search-bar-bar{
+
+}
+.item-list{
+  display:flex;
+  flex-direction: row;
+  width: 100%;
+  flex-wrap: wrap;
+
+}
+.item-container{
+  width:23%;
+  margin-left:10px
+}
+.lists-cont{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
 }
 </style>

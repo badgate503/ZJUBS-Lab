@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib.auth import login
@@ -8,7 +8,14 @@ from django.db import IntegrityError
 from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail
 
+from . import models
+from .Spider.spiengine import queryInfo, itemInfo, tb_get_qr, tb_searchItem, close_driver, tb_get_cookie
+
 import json
+
+from .models import user_profile
+
+
 # Create your views here.
 def index(request):
     return HttpResponse("Hello, world.")
@@ -71,6 +78,8 @@ def register(request):
             'message': "Register Successfully"
         }
         user.save()
+        user_prof = user_profile(user=user, user_tb_token=None)
+        user_prof.save()
         auth.login(request, user)
         print("User "+ user.first_name +" registered.")
         return HttpResponse(json.dumps(data))
@@ -95,4 +104,32 @@ def checkLoginState(request):
 def logout(request):
     auth.logout(request)
     return HttpResponse("OK")
+
+def tb_get_qrcode(request):
+    print("GET QR")
+    img = tb_get_qr()
+    return JsonResponse({'status': 'success', 'img':img})
+
+def tb_fetchItem(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    q = queryInfo(queryNum=0, queryText=query_name)
+    cookie = request.user.profile.user_tb_token
+    res = tb_searchItem(q,cookie)
+    resJson=json.dumps(res)
+    return HttpResponse(resJson)
+
+def shut_driver(request):
+    close_driver()
+    return JsonResponse({'status': 'success'})
+
+def tb_cookie(request):
+    cookie = tb_get_cookie()
+    user_prof = request.user.profile  # 假设 request.user 已登录
+    user_prof.user_tb_token = cookie
+    user_prof.save()
+    if cookie != "":
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'status':'failure'})
 
