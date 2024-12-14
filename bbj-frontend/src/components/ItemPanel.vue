@@ -12,7 +12,7 @@
 
       </div>
       <div class="price-cont">
-        <div class="price">¥{{info.price}}</div>
+        <div class="price">¥{{parseFloat(info.price).toFixed(2)}}</div>
         <div class="operations">
           <el-button @click="onClick" type="warning">跳转淘宝页面</el-button>
         </div>

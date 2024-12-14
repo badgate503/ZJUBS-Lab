@@ -19,7 +19,10 @@ class product_keyword(models.Model):
     update_time = models.DateTimeField(auto_now=True)
     minPrice = models.IntegerField()
     maxPrice = models.IntegerField()
-    avgPrice = models.FloatField()
+    TBavgPrice = models.FloatField()
+    JDavgPrice = models.FloatField()
+    TBcount = models.IntegerField()
+    JDcount = models.IntegerField()
 
 
 class user_profile(models.Model):
@@ -29,6 +32,7 @@ class user_profile(models.Model):
 
 
 class collect_record(models.Model):
-    user_profile = models.ForeignKey(user_profile, on_delete=models.CASCADE)
-    product_item = models.ForeignKey(product_item, on_delete=models.CASCADE)
+    user_profile = models.ForeignKey(User, on_delete=models.CASCADE)
+    product_keyword = models.TextField(null=False, blank=False)
+
 

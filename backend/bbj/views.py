@@ -15,7 +15,7 @@ import json
 
 from .models import user_profile
 
-from .utils import saveSearchResult, queryItems
+from .utils import saveSearchResult, queryItems, queryKeyword
 
 
 # Create your views here.
@@ -112,22 +112,34 @@ def tb_get_qrcode(request):
     img = tb_get_qr()
     return JsonResponse({'status': 'success', 'img':img})
 
-def db_fetchItem(request):
+def fetchItem(request):
     json_result = json.loads(request.body)
     query_name = json_result['query_name']
-    res = queryItems(query_name)
-    print(res)
+    existKeyWords = queryKeyword(query_name)
+    print(json_result['forceUpdate'])
+    if len(existKeyWords) != 0 and (not json_result['forceUpdate']):
+        keywordInfo = existKeyWords[0]
+        res = queryItems(query_name)
+    else:
+        q = queryInfo(queryNum=0, queryText=query_name)
+        tb_cookie = request.user.profile.user_tb_token
+        jd_cookie = request.user.profile.user_jd_token
+        if (tb_cookie == "") and (jd_cookie == ""):
+            return HttpResponse({"state":"notlogin"})
+        if(tb_cookie != ""):
+            res = tb_searchItem(q,tb_cookie)
 
-def tb_fetchItem(request):
-    json_result = json.loads(request.body)
-    query_name = json_result['query_name']
-    q = queryInfo(queryNum=0, queryText=query_name)
-    cookie = request.user.profile.user_tb_token
-    res = tb_searchItem(q,cookie)
+        keywordInfo = saveSearchResult(res, query_name)
 
-    resJson=json.dumps(res)
-    saveSearchResult(res, query_name)
-    return HttpResponse(resJson)
+
+    ret = {
+        "state":"ok",
+        "keyInfo":keywordInfo,
+        "qRes":res
+    }
+    print(ret)
+    return HttpResponse(json.dumps(ret))
+
 
 def shut_driver(request):
     close_driver()

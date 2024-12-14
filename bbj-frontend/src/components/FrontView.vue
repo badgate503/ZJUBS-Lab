@@ -5,6 +5,9 @@ import ItemList from "./ItemList.vue";
 
 <template>
   <div class="front">
+    <div class="ret-btn-cont" v-show="!logoShow" @click="onAbortSearch">
+      <div class="ret-btn" ><ElIcon size="40px"><Back/></ElIcon></div>
+    </div>
     <div class="logo-search">
       <el-collapse-transition>
         <img  v-show="logoShow" class="logo-img" alt="logo" src="../assets/logo_txt.svg"></img>
@@ -17,14 +20,13 @@ import ItemList from "./ItemList.vue";
           <el-input
               class="search-bar-bar"
               @click="onSearch"
-              @blur ="onAbortSearch"
               v-model="searchQuery"
               style="width: 600px"
               size="large"
               clearable
               placeholder="搜一搜"
           />
-          <el-button @click="onSearchSubmit" class="search-btn" size="large" type="primary"><el-icon size="large"><Search/></el-icon></el-button>
+          <el-button @click="onSearchSubmit(false)" class="search-btn" size="large" type="primary"><el-icon size="large"><Search/></el-icon></el-button>
 
         </div>
 
@@ -38,48 +40,48 @@ import ItemList from "./ItemList.vue";
     <div class="control-box">
       <div class="swi-cont">
         <el-text size="large">价格升序</el-text>
-        <el-switch style="margin-left: 10px;" v-model="price_asc" />
+        <el-switch style="margin-left: 10px;" v-model="price_asc" @change="onSort"/>
       </div>
       <div class="swi-cont">
         <el-text size="large">显示淘宝结果</el-text>
-        <el-switch style="margin-left: 10px;" v-model="showTBRes" />
+        <el-switch style="margin-left: 10px;" v-model="showTBRes" @change="onSort"/>
       </div>
       <div class="swi-cont">
         <el-text size="large">显示京东结果</el-text>
-        <el-switch style="margin-left: 10px;" v-model="showJDRes" />
+        <el-switch style="margin-left: 10px;" v-model="showJDRes" @change="onSort"/>
       </div>
 
     </div>
     <div class="control-box">
       <div class="info-cont">
         <el-text size="large">淘宝平均价格</el-text>
-        <a class="info-price-text">¥{{QueryResInfo.TBavgPrice}}</a>
+        <a class="info-price-text">¥{{parseFloat(QueryResInfo.TBavgPrice).toFixed(2)}}</a>
       </div>
       <div class="info-cont">
         <el-text size="large">京东平均价格</el-text>
-        <a class="info-price-text">¥{{QueryResInfo.JDavgPrice}}</a>
+        <a class="info-price-text">¥{{parseFloat(QueryResInfo.JDavgPrice).toFixed(2)}}</a>
       </div>
       <div class="info-cont">
         <el-text size="large">最低价格</el-text>
-        <a class="info-price-text">¥{{QueryResInfo.minPrice}}</a>
+        <a class="info-price-text">¥{{parseFloat(QueryResInfo.minPrice).toFixed(2)}}</a>
       </div>
       <div class="info-cont">
         <el-text size="large">最高价格</el-text>
-        <a class="info-price-text">¥{{QueryResInfo.maxPrice}}</a>
+        <a class="info-price-text">¥{{parseFloat(QueryResInfo.maxPrice).toFixed(2)}}</a>
       </div>
     </div>
       <div class="control-box">
       <div class="info-cont">
-        <el-text>搜索结果更新时间:{{QueryResInfo.updateTime}}</el-text>
+        <el-text>获取淘宝商品{{QueryResInfo.TBcount}}项; 京东商品{{QueryResInfo.JDcount}}项; 搜索结果更新时间:{{QueryResInfo.updateTime}}</el-text>
       </div>
       </div>
     <div class="control-box">
 
       <div class="control-btn-box">
-        <el-button type="primary">重新搜索</el-button>
+        <el-button type="primary" @click="onSearchSubmit(true)">重新搜索</el-button>
       </div>
       <div class="control-btn-box">
-        <el-button type="primary">收藏关键词</el-button>
+        <el-button type="primary"><ElIcon style="margin-right: 5px;"><Star/></ElIcon>收藏关键词</el-button>
       </div>
     </div>
     </div>
@@ -89,10 +91,10 @@ import ItemList from "./ItemList.vue";
       <div v-show="!logoShow">
 
         <el-empty v-show="searchNotSubmit" description="请输入想找的东西" />
-        <el-empty v-show="!loading && !searchHasResult" description="未找到任何商品" />
+        <el-empty v-show="!loading && (!searchHasResult || (!searchNotSubmit && showResultList.length===0))" description="未找到任何商品" />
 
         <div v-loading="loading"  class="item-list">
-          <div class="item-container" v-for="item in searchResult">
+          <div class="item-container" v-for="item in showResultList">
             <ItemPanel :info="item"></ItemPanel>
           </div>
         </div>
@@ -127,6 +129,7 @@ export default {
       qr_src:"",
       price_asc:false,
       searchResult:[],
+      showResultList:[],
       showTBRes:true,
       showJDRes:true,
       ItemLists:[
@@ -160,7 +163,9 @@ export default {
         JDavgPrice:0,
         minPrice:0,
         maxPrice:0,
-        updateTime:"2024年1月1日"
+        TBcount:0,
+        JDcount:0,
+        updateTime:""
       }
     }
 
@@ -173,20 +178,28 @@ export default {
       this.searchHasResult = true;
     },
     onAbortSearch(){
-      if(this.searchQuery === ""){
-        this.logoShow = true;
-        this.searchHasResult = false;
-        this.searchResult = [];
-        this.searchNotSubmit = true;
-      }
+      this.logoShow = true;
+      this.loading=false;
+      this.searchQuery=''
+      this.searchNotSubmit = true;
+      this.resetSearchResult()
+    },
+    resetSearchResult(){
+      this.searchHasResult = false;
+      this.searchResult = [];
+      this.showResultList=[];
+      this.showTBRes=true;
+      this.showJDRes=true
+      this.price_asc=false
     },
     onClickItem(itemname){
       console.log(itemname)
       this.onSearch()
       this.searchQuery=itemname
-      this.onSearchSubmit()
+      this.onSearchSubmit(false)
     },
-    onSearchSubmit(){
+    onSearchSubmit(forceUpdate){
+      this.resetSearchResult()
       this.loading = true
       this.searchNotSubmit = false
       this.searchHasResult = false
@@ -194,11 +207,9 @@ export default {
         ElMessage.error("请输入搜索内容")
         return;
       }
-
-
-
-      axios.post("/api/db_fetchItem",{
-        query_name:this.searchQuery
+      axios.post("/api/fetchItem",{
+        query_name:this.searchQuery,
+        forceUpdate:forceUpdate,
       },{
         withCredentials: true,
         headers: {
@@ -207,9 +218,26 @@ export default {
         }
       }).then(res=>{
         console.log(res.data)
-        this.searchResult=res.data
+        if(res.data.state === "notlogin") {
+          this.loading = false
+          ElMessage("请先至少登录淘宝或京东中的一项")
+          return;
+        }
+        this.searchResult=res.data.qRes
+        this.showResultList = this.searchResult
+        this.onSort()
+
+        if(!res.data.keyInfo.hasOwnProperty('update_time'))
+          this.QueryResInfo.updateTime = "刚刚"
+        else
+          this.QueryResInfo.updateTime = res.data.keyInfo.update_time
+        this.QueryResInfo.maxPrice = res.data.keyInfo.maxPrice/100
+        this.QueryResInfo.minPrice = res.data.keyInfo.minPrice/100
+        this.QueryResInfo.TBavgPrice = res.data.keyInfo.TBavgPrice/100
+        this.QueryResInfo.JDcount = res.data.keyInfo.JDcount
+        this.QueryResInfo.TBcount = res.data.keyInfo.TBcount
         this.searchNotSubmit = false;
-        if(res.data !== null && res.data.length !== 0) {
+        if(res.data.qRes !== null && res.data.qRes.length !== 0) {
           this.searchHasResult = true;
         }
         this.loading = false
@@ -220,9 +248,13 @@ export default {
         ElMessage.error("出现内部错误，请重新登录淘宝/京东！")
       })
     },
-
-    onClick() {
-      axios.get('/api/send_email')
+    onSort(){
+      this.showResultList = this.searchResult.filter(item=>{
+        return (this.showTBRes && item.fromwhich==="taobao")||(this.showJDRes && item.fromwhich==="jingdong")
+      })
+      this.showResultList.sort((a,b)=>{
+        return this.price_asc ? a.price - b.price : b.price - a.price
+      })
     }
   },
 
@@ -308,4 +340,15 @@ export default {
   margin-left: 10px;
   margin-right: 10px;
 }
+.ret-btn-cont{
+  margin-left: 20px;
+  margin-top: 20px;
+
+}
+
+.ret-btn :hover{
+  border-radius: 5px;
+  background-color: ghostwhite;
+}
+
 </style>
