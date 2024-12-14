@@ -13,7 +13,7 @@ import ItemList from "./ItemList.vue";
         <img  v-show="logoShow" class="logo-img" alt="logo" src="../assets/logo_txt.svg"></img>
       </el-collapse-transition>
 
-      <div class="search-bar">
+      <div class="search-bar" v-show="searchNotSubmit">
 
         <div class="search-bar-cont">
 
@@ -35,7 +35,9 @@ import ItemList from "./ItemList.vue";
     </div>
     <el-collapse-transition>
     <div class="control-group" v-show="!searchNotSubmit && searchHasResult">
-
+    <div class="control-box">
+      <a class="title-text">"{{searchQuery}}"的搜索结果</a>
+    </div>
 
     <div class="control-box">
       <div class="swi-cont">
@@ -81,7 +83,7 @@ import ItemList from "./ItemList.vue";
         <el-button type="primary" @click="onSearchSubmit(true)">重新搜索</el-button>
       </div>
       <div class="control-btn-box">
-        <el-button type="primary"><ElIcon style="margin-right: 5px;"><Star/></ElIcon>收藏关键词</el-button>
+        <el-button type="primary" @click="onFavorKeyword"><ElIcon style="margin-right: 5px;"><Star/></ElIcon>收藏关键词</el-button>
       </div>
     </div>
     </div>
@@ -255,6 +257,24 @@ export default {
       this.showResultList.sort((a,b)=>{
         return this.price_asc ? a.price - b.price : b.price - a.price
       })
+    },
+    onFavorKeyword(){
+      if(this.searchQuery !== ""){
+        axios.post("/api/favorKey",{
+          query_name:this.searchQuery,
+        },{
+          withCredentials: true,
+          headers: {
+            "content-type": "application/json",
+            'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+          }
+        }).then((res)=>{
+          if(res.data==="OK")
+            ElMessage.success("成功收藏该商品")
+          else if(res.data==="exist")
+            ElMessage.error("已收藏过该商品！")
+        })
+      }
     }
   },
 
@@ -349,6 +369,10 @@ export default {
 .ret-btn :hover{
   border-radius: 5px;
   background-color: ghostwhite;
+}
+.title-text{
+  color:#e5633c;
+  font-size: 40px;
 }
 
 </style>

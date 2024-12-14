@@ -13,7 +13,7 @@ from .Spider.spiengine import queryInfo, itemInfo, tb_get_qr, tb_searchItem, clo
 
 import json
 
-from .models import user_profile
+from .models import user_profile, collect_record, product_keyword
 
 from .utils import saveSearchResult, queryItems, queryKeyword
 
@@ -23,9 +23,11 @@ def index(request):
     return HttpResponse("Hello, world.")
 
 def send_email(request):
+    json_result = json.loads(request.body)
+
     send_mail(
-        subject='欢迎注册比比价',
-        message='您的验证码为 114514',
+        subject=subject,
+        message=message,
         from_email='bibijia1011@163.com',
         recipient_list=[request.user.username],
         fail_silently=False
@@ -80,7 +82,7 @@ def register(request):
             'message': "Register Successfully"
         }
         user.save()
-        user_prof = user_profile(user=user, user_tb_token=None)
+        user_prof = user_profile(user=user, user_tb_token=None, user_jd_token=None)
         user_prof.save()
         auth.login(request, user)
         print("User "+ user.first_name +" registered.")
@@ -124,8 +126,8 @@ def fetchItem(request):
         q = queryInfo(queryNum=0, queryText=query_name)
         tb_cookie = request.user.profile.user_tb_token
         jd_cookie = request.user.profile.user_jd_token
-        if (tb_cookie == "") and (jd_cookie == ""):
-            return HttpResponse({"state":"notlogin"})
+        if (tb_cookie is None) and (jd_cookie is None):
+            return HttpResponse(json.dumps({"state":"notlogin"}))
         if(tb_cookie != ""):
             res = tb_searchItem(q,tb_cookie)
 
@@ -155,3 +157,47 @@ def tb_cookie(request):
     else:
         return JsonResponse({'status':'failure'})
 
+def favorKey(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    exist_collect = collect_record.objects.filter(product_keyword=query_name)
+    if(len(exist_collect)!=0):
+        return HttpResponse("exist")
+    new_collect = collect_record(user_profile=request.user, product_keyword=query_name, need_notify=False)
+    new_collect.save()
+    return HttpResponse("OK")
+
+def favorNotify(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    new_need = json_result['new_need']
+    exist_collect = collect_record.objects.filter(user_profile=request.user, product_keyword=query_name)[0]
+    exist_collect.need_notify = new_need
+    exist_collect.save()
+    return HttpResponse("OK")
+
+def get_keyword_info(request):
+    collect_list = list(collect_record.objects.filter(user_profile=request.user).values("product_keyword", "need_notify"))
+    infoList=[]
+    for keyword in collect_list:
+        latestInfo = { "keyInfo": queryKeyword(keyword['product_keyword'])[0], "need_notify":keyword['need_notify']}
+        infoList.append(latestInfo)
+    print(infoList)
+    return HttpResponse(json.dumps(infoList))
+
+def remove_favor(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    favor_record = collect_record.objects.filter(user_profile=request.user, product_keyword=query_name)
+    favor_record.delete()
+    return HttpResponse("OK")
+
+def getPriceChange(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    records = list(product_keyword.objects.filter(keyword_name=query_name).values("update_time", "TBavgPrice", "JDavgPrice", "minPrice"))
+    renamed_result = [
+        {'update_time': item['update_time'].strftime('%Y-%m-%d %H:%I:%S'), 'minPrice':item['minPrice'], 'TBavgPrice':item['TBavgPrice'], 'JDavgPrice':item['JDavgPrice']}
+        for item in records
+    ]
+    return HttpResponse(json.dumps(renamed_result))

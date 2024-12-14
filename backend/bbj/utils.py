@@ -1,4 +1,4 @@
-from .models import product_item,product_keyword
+from .models import product_item,product_keyword, product_keyword_general
 from django.forms.models import model_to_dict
 
 def saveSearchResult(result, resultKeyWord):
@@ -22,12 +22,15 @@ def saveSearchResult(result, resultKeyWord):
         else:
             JDtotPrice += price
             JDcount+=1
-        if minPrice == -1:
-            minPrice = price
-        else:
-            minPrice = min(minPrice, price)
+
         maxPrice = max(maxPrice, price)
         ele = product_item(product_name=str(element['name']), product_keyword=resultKeyWord, price=price, link=str(element['link']), img=str(element['img']), fromwhich=fromWhich)
+        if minPrice == -1:
+            minPrice = price
+            minPriceItem = ele
+        else:
+            minPrice = min(minPrice, price)
+            minPriceItem = ele
         ele.save()
     if(JDcount == 0):
         JDavgPrice = 0
@@ -39,6 +42,13 @@ def saveSearchResult(result, resultKeyWord):
         TBavgPrice = TBtotPrice/TBcount
     ele_key = product_keyword(keyword_name=resultKeyWord, minPrice=minPrice, maxPrice=maxPrice, TBavgPrice=TBavgPrice, JDavgPrice= JDavgPrice, TBcount=TBcount, JDcount=JDcount)
     ele_key.save()
+    keyword_general_record = product_keyword_general.objects.filter(keyword_name=resultKeyWord)
+    if(len(keyword_general_record) != 0):
+        keyword_general_record[0].latest_keyword_info = ele_key
+        keyword_general_record[0].minPriceItem = minPriceItem
+    else:
+        gen_rec = keyword_general_record(keyword_name=resultKeyWord, latest_keyword_info = ele_key, minPriceItem=minPriceItem)
+        gen_rec.save()
     return model_to_dict(ele_key)
 
 def queryItems(itemKeyWord):
@@ -56,3 +66,6 @@ def queryKeyword(itemKeyWord):
         for item in itemKeywordList
     ]
     return renamed_result
+
+def sendPriceUpdateNotify(itemKeyWord, newLowest):
+    return 0

@@ -24,6 +24,12 @@ class product_keyword(models.Model):
     TBcount = models.IntegerField()
     JDcount = models.IntegerField()
 
+class product_keyword_general(models.Model):
+    keyword_name = models.TextField()
+    latest_keyword_info = models.ForeignKey(product_keyword, on_delete=models.CASCADE)
+    minPriceItem = models.ForeignKey(product_item, on_delete=models.CASCADE)
+
+
 
 class user_profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE,related_name='profile')
@@ -34,5 +40,4 @@ class user_profile(models.Model):
 class collect_record(models.Model):
     user_profile = models.ForeignKey(User, on_delete=models.CASCADE)
     product_keyword = models.TextField(null=False, blank=False)
-
-
+    need_notify = models.BooleanField()
