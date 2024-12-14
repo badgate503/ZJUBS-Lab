@@ -27,7 +27,8 @@ class product_keyword(models.Model):
 class product_keyword_general(models.Model):
     keyword_name = models.TextField()
     latest_keyword_info = models.ForeignKey(product_keyword, on_delete=models.CASCADE)
-    minPriceItem = models.ForeignKey(product_item, on_delete=models.CASCADE)
+    lowest = models.IntegerField()
+    lowest_link = models.TextField()
 
 
 

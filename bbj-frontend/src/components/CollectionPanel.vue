@@ -66,7 +66,7 @@
       <div class="dialog-footer">
         <el-text style="margin-right:10px;">邮件通知价格更新</el-text>
         <el-switch style="margin-right:10px;" size="large" v-model="info.need_notify" @change="onEditNeedNotify"></el-switch>
-        <el-button @click="" type="primary">去往搜索页</el-button>
+        <el-button  type="primary" @click="gotoLink">去往最低价商品购买页</el-button>
         <el-button @click="showDetail=false">关闭</el-button>
       </div>
     </template>
@@ -201,7 +201,7 @@ export default {
           'X-CSRFTOKEN': this.$cookies.get("csrftoken")
         }
       }).then(res=>{
-        let priceChange = res.data.reverse()
+        let priceChange = res.data
         this.chartOption.xAxis.data = priceChange.map(iter=>iter.update_time)
         this.chartOption.series[0].data = priceChange.map(iter=>parseFloat(iter.TBavgPrice/100).toFixed(2))
         this.chartOption.series[1].data = priceChange.map(iter=>parseFloat(iter.JDavgPrice/100).toFixed(2))
@@ -224,6 +224,9 @@ export default {
         if(res.data==="OK")
           ElMessage.success("成功修改")
       })
+    },
+    gotoLink(){
+      window.location.href= this.info.lowest_link
     }
   },
 

@@ -13,7 +13,7 @@ from .Spider.spiengine import queryInfo, itemInfo, tb_get_qr, tb_searchItem, clo
 
 import json
 
-from .models import user_profile, collect_record, product_keyword
+from .models import user_profile, collect_record, product_keyword, product_keyword_general
 
 from .utils import saveSearchResult, queryItems, queryKeyword
 
@@ -25,13 +25,7 @@ def index(request):
 def send_email(request):
     json_result = json.loads(request.body)
 
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email='bibijia1011@163.com',
-        recipient_list=[request.user.username],
-        fail_silently=False
-    )
+
     return HttpResponse('OK')
 
 
@@ -180,7 +174,9 @@ def get_keyword_info(request):
     collect_list = list(collect_record.objects.filter(user_profile=request.user).values("product_keyword", "need_notify"))
     infoList=[]
     for keyword in collect_list:
-        latestInfo = { "keyInfo": queryKeyword(keyword['product_keyword'])[0], "need_notify":keyword['need_notify']}
+        print(keyword['product_keyword'])
+        ll = product_keyword_general.objects.filter(keyword_name=keyword['product_keyword'])[0].lowest_link
+        latestInfo = { "keyInfo": queryKeyword(keyword['product_keyword'])[0], "need_notify":keyword['need_notify'], "lowest_link":ll}
         infoList.append(latestInfo)
     print(infoList)
     return HttpResponse(json.dumps(infoList))
@@ -195,9 +191,9 @@ def remove_favor(request):
 def getPriceChange(request):
     json_result = json.loads(request.body)
     query_name = json_result['query_name']
-    records = list(product_keyword.objects.filter(keyword_name=query_name).values("update_time", "TBavgPrice", "JDavgPrice", "minPrice"))
+    records = list(product_keyword.objects.filter(keyword_name=query_name).order_by('update_time').values("update_time", "TBavgPrice", "JDavgPrice", "minPrice"))
     renamed_result = [
-        {'update_time': item['update_time'].strftime('%Y-%m-%d %H:%I:%S'), 'minPrice':item['minPrice'], 'TBavgPrice':item['TBavgPrice'], 'JDavgPrice':item['JDavgPrice']}
+        {'update_time': item['update_time'].strftime('%Y-%m-%d %H:%M:%S'), 'minPrice':item['minPrice'], 'TBavgPrice':item['TBavgPrice'], 'JDavgPrice':item['JDavgPrice']}
         for item in records
     ]
     return HttpResponse(json.dumps(renamed_result))

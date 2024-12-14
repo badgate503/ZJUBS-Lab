@@ -1,4 +1,6 @@
-from .models import product_item,product_keyword, product_keyword_general
+from django.core.mail import send_mail
+
+from .models import product_item,product_keyword, product_keyword_general,collect_record
 from django.forms.models import model_to_dict
 
 def saveSearchResult(result, resultKeyWord):
@@ -11,6 +13,7 @@ def saveSearchResult(result, resultKeyWord):
     JDcount = 0
     minPrice=-1
     maxPrice=-1
+
     objs = product_item.objects.filter(product_keyword=resultKeyWord)
     objs.delete()
     for element in result:
@@ -30,8 +33,9 @@ def saveSearchResult(result, resultKeyWord):
             minPriceItem = ele
         else:
             minPrice = min(minPrice, price)
-            minPriceItem = ele
+            if(minPrice == price): minPriceItem = ele
         ele.save()
+
     if(JDcount == 0):
         JDavgPrice = 0
     else:
@@ -42,12 +46,22 @@ def saveSearchResult(result, resultKeyWord):
         TBavgPrice = TBtotPrice/TBcount
     ele_key = product_keyword(keyword_name=resultKeyWord, minPrice=minPrice, maxPrice=maxPrice, TBavgPrice=TBavgPrice, JDavgPrice= JDavgPrice, TBcount=TBcount, JDcount=JDcount)
     ele_key.save()
+
     keyword_general_record = product_keyword_general.objects.filter(keyword_name=resultKeyWord)
     if(len(keyword_general_record) != 0):
         keyword_general_record[0].latest_keyword_info = ele_key
-        keyword_general_record[0].minPriceItem = minPriceItem
+        if(minPrice < keyword_general_record[0].lowest):
+            keyword_general_record[0].lowest = minPrice
+            keyword_general_record[0].lowest_link = minPriceItem.link
+            collectors = collect_record.objects.filter(product_keyword=resultKeyWord)
+            notify_list=[]
+            for collector in collectors:
+                if(collector.need_notify):
+                    notify_list.append(collector.user_profile.username)
+            sendMail("比比价降价通知","您关注的商品【"+resultKeyWord+"】降价了！最新价格为 ¥"+str(minPrice/100)+"，🔗：https:"+minPriceItem.link,notify_list)
+            keyword_general_record.save()
     else:
-        gen_rec = keyword_general_record(keyword_name=resultKeyWord, latest_keyword_info = ele_key, minPriceItem=minPriceItem)
+        gen_rec = product_keyword_general(keyword_name=resultKeyWord, latest_keyword_info=ele_key, lowest=minPrice, lowest_link=minPriceItem.link)
         gen_rec.save()
     return model_to_dict(ele_key)
 
@@ -60,12 +74,20 @@ def queryItems(itemKeyWord):
     return renamed_result
 
 def queryKeyword(itemKeyWord):
-    itemKeywordList = list(product_keyword.objects.filter(keyword_name=itemKeyWord).order_by('update_time').values('keyword_name', 'update_time', 'minPrice', 'maxPrice', 'TBavgPrice','JDavgPrice', 'TBcount', 'JDcount'))
+    itemKeywordList = list(reversed(list(product_keyword.objects.filter(keyword_name=itemKeyWord).order_by('update_time').values('keyword_name', 'update_time', 'minPrice', 'maxPrice', 'TBavgPrice','JDavgPrice', 'TBcount', 'JDcount'))))
     renamed_result = [
         {'keyword_name': item['keyword_name'], 'update_time': item['update_time'].strftime('%Y-%m-%d %H:%I:%S'), 'minPrice':item['minPrice'], 'maxPrice':item['maxPrice'], 'TBavgPrice':item['TBavgPrice'], 'JDavgPrice':item['JDavgPrice'], 'TBcount':item['TBcount'], 'JDcount':item['JDcount']}
         for item in itemKeywordList
     ]
     return renamed_result
 
-def sendPriceUpdateNotify(itemKeyWord, newLowest):
-    return 0
+
+def sendMail(subject, message, user_mail):
+    print(user_mail)
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email='bibijia1011@163.com',
+        recipient_list=user_mail,
+        fail_silently=False
+    )
