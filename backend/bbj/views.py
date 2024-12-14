@@ -15,6 +15,8 @@ import json
 
 from .models import user_profile
 
+from .utils import saveSearchResult, queryItems
+
 
 # Create your views here.
 def index(request):
@@ -110,13 +112,21 @@ def tb_get_qrcode(request):
     img = tb_get_qr()
     return JsonResponse({'status': 'success', 'img':img})
 
+def db_fetchItem(request):
+    json_result = json.loads(request.body)
+    query_name = json_result['query_name']
+    res = queryItems(query_name)
+    print(res)
+
 def tb_fetchItem(request):
     json_result = json.loads(request.body)
     query_name = json_result['query_name']
     q = queryInfo(queryNum=0, queryText=query_name)
     cookie = request.user.profile.user_tb_token
     res = tb_searchItem(q,cookie)
+
     resJson=json.dumps(res)
+    saveSearchResult(res, query_name)
     return HttpResponse(resJson)
 
 def shut_driver(request):

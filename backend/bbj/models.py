@@ -1,14 +1,25 @@
 from django.db import models
 from django.contrib.auth.models import User
 # Create your models here.
-class product_item(models.Model):
-    product_id = models.AutoField
-    product_name = models.CharField(max_length=128)
-    category = models.CharField(max_length=128)
-    specification = models.CharField(max_length=128)
-    img = models.ImageField
-    code = models.CharField(max_length=128)
 
+class product_item(models.Model):
+    product_id = models.AutoField(primary_key=True)
+    product_name = models.TextField()
+    product_keyword = models.TextField()
+    category = models.TextField()
+    specification = models.TextField()
+    price = models.IntegerField()
+    link = models.TextField()
+    fromwhich=models.CharField(max_length=10, default="none")
+    img = models.TextField()
+
+class product_keyword(models.Model):
+    keyword_id = models.AutoField(primary_key=True)
+    keyword_name = models.TextField()
+    update_time = models.DateTimeField(auto_now=True)
+    minPrice = models.IntegerField()
+    maxPrice = models.IntegerField()
+    avgPrice = models.FloatField()
 
 
 class user_profile(models.Model):

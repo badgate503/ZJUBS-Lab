@@ -31,12 +31,65 @@ import ItemList from "./ItemList.vue";
       </div>
 
     </div>
+    <el-collapse-transition>
+    <div class="control-group" v-show="!searchNotSubmit && searchHasResult">
+
+
+    <div class="control-box">
+      <div class="swi-cont">
+        <el-text size="large">价格升序</el-text>
+        <el-switch style="margin-left: 10px;" v-model="price_asc" />
+      </div>
+      <div class="swi-cont">
+        <el-text size="large">显示淘宝结果</el-text>
+        <el-switch style="margin-left: 10px;" v-model="showTBRes" />
+      </div>
+      <div class="swi-cont">
+        <el-text size="large">显示京东结果</el-text>
+        <el-switch style="margin-left: 10px;" v-model="showJDRes" />
+      </div>
+
+    </div>
+    <div class="control-box">
+      <div class="info-cont">
+        <el-text size="large">淘宝平均价格</el-text>
+        <a class="info-price-text">¥{{QueryResInfo.TBavgPrice}}</a>
+      </div>
+      <div class="info-cont">
+        <el-text size="large">京东平均价格</el-text>
+        <a class="info-price-text">¥{{QueryResInfo.JDavgPrice}}</a>
+      </div>
+      <div class="info-cont">
+        <el-text size="large">最低价格</el-text>
+        <a class="info-price-text">¥{{QueryResInfo.minPrice}}</a>
+      </div>
+      <div class="info-cont">
+        <el-text size="large">最高价格</el-text>
+        <a class="info-price-text">¥{{QueryResInfo.maxPrice}}</a>
+      </div>
+    </div>
+      <div class="control-box">
+      <div class="info-cont">
+        <el-text>搜索结果更新时间:{{QueryResInfo.updateTime}}</el-text>
+      </div>
+      </div>
+    <div class="control-box">
+
+      <div class="control-btn-box">
+        <el-button type="primary">重新搜索</el-button>
+      </div>
+      <div class="control-btn-box">
+        <el-button type="primary">收藏关键词</el-button>
+      </div>
+    </div>
+    </div>
+    </el-collapse-transition>
     <el-divider style="margin-top: 60px" ></el-divider>
     <transition name="el-fade-in">
       <div v-show="!logoShow">
 
         <el-empty v-show="searchNotSubmit" description="请输入想找的东西" />
-        <el-empty v-show="!searchNotSubmit && !searchHasResult" description="未找到任何商品" />
+        <el-empty v-show="!loading && !searchHasResult" description="未找到任何商品" />
 
         <div v-loading="loading"  class="item-list">
           <div class="item-container" v-for="item in searchResult">
@@ -62,6 +115,7 @@ import {getCurrentUser} from "../utils.js";
 import { Search } from '@element-plus/icons-vue'
 import 'animate.css'
 import ItemList from "./ItemList.vue";
+import {ElMessage} from "element-plus";
 export default {
   data() {
     return{
@@ -71,8 +125,12 @@ export default {
       searchHasResult:true,
       loading:false,
       qr_src:"",
+      price_asc:false,
       searchResult:[],
-      ItemLists:[{
+      showTBRes:true,
+      showJDRes:true,
+      ItemLists:[
+          {
         title:"电脑整机",
         list:["笔记本电脑","游戏本","平板电脑","DIY电脑","服务器/工作站","一体机","闺蜜机"]
       },{
@@ -96,7 +154,14 @@ export default {
       },{
         title:"体育用品",
         list:["乒乓球","羽毛球","篮球","足球","轮滑","滑板","网球","高尔夫","台球","排球","田径鞋"]
-      }]
+      }],
+      QueryResInfo:{
+        TBavgPrice:0,
+        JDavgPrice:0,
+        minPrice:0,
+        maxPrice:0,
+        updateTime:"2024年1月1日"
+      }
     }
 
   },components: {
@@ -110,7 +175,7 @@ export default {
     onAbortSearch(){
       if(this.searchQuery === ""){
         this.logoShow = true;
-        this.searchHasResult = true;
+        this.searchHasResult = false;
         this.searchResult = [];
         this.searchNotSubmit = true;
       }
@@ -124,8 +189,15 @@ export default {
     onSearchSubmit(){
       this.loading = true
       this.searchNotSubmit = false
-      this.searchHasResult = true
-      axios.post("/api/tb_fetchItem",{
+      this.searchHasResult = false
+      if(this.searchQuery.length === 0 || this.searchQuery === ""){
+        ElMessage.error("请输入搜索内容")
+        return;
+      }
+
+
+
+      axios.post("/api/db_fetchItem",{
         query_name:this.searchQuery
       },{
         withCredentials: true,
@@ -137,10 +209,15 @@ export default {
         console.log(res.data)
         this.searchResult=res.data
         this.searchNotSubmit = false;
-        if(res.data === null || res.data.length === 0) {
-          this.searchHasResult = false;
+        if(res.data !== null && res.data.length !== 0) {
+          this.searchHasResult = true;
         }
         this.loading = false
+      }).catch(e=>{
+        console.log(e)
+        this.searchHasResult = false;
+        this.loading = false;
+        ElMessage.error("出现内部错误，请重新登录淘宝/京东！")
       })
     },
 
@@ -174,7 +251,12 @@ export default {
   justify-content: center;
   flex-direction: row;
 }
-
+.control-box{
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
 
 .search-bar-cont{
   display: flex;
@@ -203,5 +285,27 @@ export default {
   flex-direction: column;
   align-items: center;
 
+}
+.info-cont{
+  margin-left: 20px;
+  margin-right: 20px;
+
+}
+.info-price-text{
+  margin-left: 5px;
+  font-size: 30px;
+  color: #e11414
+}
+.swi-cont{
+  display: flex;
+  margin-right: 30px;
+  margin-left: 30px;
+  flex-direction: row;
+  align-items: center;
+  width: fit-content;
+}
+.control-btn-box{
+  margin-left: 10px;
+  margin-right: 10px;
 }
 </style>
