@@ -33,6 +33,11 @@
             {{ curUser.userName }}
           </div>
 
+          <div class="login-state">
+            <el-tag type="primary" v-show="isTBLogin">已登录淘宝</el-tag>
+            <el-tag type="primary" style="margin-left: 10px;" v-show="isJDLogin">已登录京东</el-tag>
+          </div>
+
           <div class="userEmail">
             <el-icon><Message /></el-icon>
             <div class="textEmail">
@@ -40,6 +45,7 @@
             </div>
 
           </div>
+
         </div>
 
 
@@ -67,13 +73,13 @@
   </div>
   <el-dialog
       v-model="dialogVisible"
-      title="登录淘宝"
+      :title="'登录'+name"
       width="500"
       :before-close="handleCancelLoginTaobao"
   >
 
     <div class="qr-cont">
-      <el-text size="large">请使用手机淘宝扫码登录</el-text>
+      <el-text size="large">请使用手机{{name}}扫码登录</el-text>
       <div  class ="qrcode">
         <el-image v-loading="QRLoading" :src="QRSrc" alt="QRcode" ></el-image>
       </div>
@@ -159,6 +165,9 @@ export default {
         userName:"",
         userEmail:"",
       },
+      isTBLogin:false,
+      isJDLogin:false,
+      name:"淘宝",
       isCollapse:true,
       dialogVisible:false,
       QRLoading:true,
@@ -178,23 +187,24 @@ export default {
       })
     },
 
-    async onlogTaobao(){
+    async onlogTaobao() {
+      this.name = "淘宝"
       this.QRLoading = true;
       this.dialogVisible = true;
-      await axios.post("/api/tb_get_qrcode", {},{
+      await axios.post("/api/tb_get_qrcode", {}, {
         withCredentials: true,
         headers: {
           "content-type": "application/json",
           'X-CSRFTOKEN': this.$cookies.get("csrftoken")
         }
-      }).then(res=>{
+      }).then(res => {
         console.log(res)
-        if(res.data.status==="success"){
+        if (res.data.status === "success") {
           this.QRSrc = `data:image/png;base64,${res.data.img}`;
           this.QRLoading = false;
 
-        }else{
-          axios.post("/api/close_driver",{},{
+        } else {
+          axios.post("/api/close_driver", {}, {
             withCredentials: true,
             headers: {
               "content-type": "application/json",
@@ -203,23 +213,23 @@ export default {
           })
         }
       })
-      await axios.post("/api/tb_get_cookie",{},{
+      await axios.post("/api/tb_get_cookie", {}, {
         withCredentials: true,
         headers: {
           "content-type": "application/json",
           'X-CSRFTOKEN': this.$cookies.get("csrftoken")
         }
-      }).then(res=>{
+      }).then(res => {
         console.log(res)
-        if(res.data.status==="success"){
+        if (res.data.status === "success") {
           console.log("OK")
-          this.QRLoading=true;
-          this.dialogVisible=false;
+          this.QRLoading = true;
+          this.dialogVisible = false;
           ElMessage({
             message: '淘宝登录成功！',
             type: 'success',
           })
-        }else{
+        } else {
           ElMessage({
             message: '登录失败',
             type: 'warning',
@@ -229,24 +239,76 @@ export default {
     },
 
 
-    handleCancelLoginTaobao(){
+    handleCancelLoginTaobao() {
       this.QRLoading = true;
       this.dialogVisible = false;
-      axios.post("/api/close_driver",{},{
+      axios.post("/api/close_driver", {}, {
         withCredentials: true,
         headers: {
           "content-type": "application/json",
           'X-CSRFTOKEN': this.$cookies.get("csrftoken")
         }
       })
-    }
+    },
 
+    async onlogJindong() {
+      this.name = "京东"
+      this.QRLoading = true;
+      this.dialogVisible = true;
+      await axios.post("/api/jd_get_qrcode", {}, {
+        withCredentials: true,
+        headers: {
+          "content-type": "application/json",
+          'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+        }
+      }).then(res => {
+        console.log(res)
+        if (res.data.status === "success") {
+          this.QRSrc = `data:image/png;base64,${res.data.img}`;
+          this.QRLoading = false;
+
+        } else {
+          axios.post("/api/close_driver", {}, {
+            withCredentials: true,
+            headers: {
+              "content-type": "application/json",
+              'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+            }
+          })
+        }
+      })
+      await axios.post("/api/jd_get_cookie", {}, {
+        withCredentials: true,
+        headers: {
+          "content-type": "application/json",
+          'X-CSRFTOKEN': this.$cookies.get("csrftoken")
+        }
+      }).then(res => {
+        console.log(res)
+        if (res.data.status === "success") {
+          console.log("OK")
+          this.QRLoading = true;
+          this.dialogVisible = false;
+          ElMessage({
+            message: '京东登录成功！',
+            type: 'success',
+          })
+        } else {
+          ElMessage({
+            message: '登录失败',
+            type: 'warning',
+          })
+        }
+      })
+    },
   },
   async created() {
     this.$router.push('/front')
     var res = await getCurrentUser(this)
     this.curUser.userName = res["userName"]
     this.curUser.userEmail = res["userEmail"]
+    this.isTBLogin = res["userTBLogged"]
+    this.isJDLogin = res["userJDLogged"]
   },
 
 

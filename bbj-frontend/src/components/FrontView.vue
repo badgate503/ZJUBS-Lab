@@ -236,6 +236,7 @@ export default {
         this.QueryResInfo.maxPrice = res.data.keyInfo.maxPrice/100
         this.QueryResInfo.minPrice = res.data.keyInfo.minPrice/100
         this.QueryResInfo.TBavgPrice = res.data.keyInfo.TBavgPrice/100
+        this.QueryResInfo.JDavgPrice = res.data.keyInfo.JDavgPrice/100
         this.QueryResInfo.JDcount = res.data.keyInfo.JDcount
         this.QueryResInfo.TBcount = res.data.keyInfo.TBcount
         this.searchNotSubmit = false;

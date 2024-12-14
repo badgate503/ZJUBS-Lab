@@ -14,7 +14,7 @@
       <div class="price-cont">
         <div class="price">¥{{parseFloat(info.price).toFixed(2)}}</div>
         <div class="operations">
-          <el-button @click="onClick" type="warning">跳转淘宝页面</el-button>
+          <el-button @click="onClick" type="warning">跳转{{info.fromwhich==="taobao"? '淘宝':'京东'}}页面</el-button>
         </div>
       </div>
 
@@ -36,11 +36,14 @@ import ECharts from "vue-echarts";
 export default {
   data() {
     return {
-
+      tname:""
     }
   },
   props: {
     info:Object,
+  },
+  mounted() {
+    this.tname= (this.info.fromwhich === "jingdong") ? "京东":"淘宝"
   },
   methods: {
     onClick() {

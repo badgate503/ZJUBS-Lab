@@ -9,7 +9,7 @@ from django.middleware.csrf import get_token ,rotate_token
 from django.core.mail import send_mail
 
 from . import models
-from .Spider.spiengine import queryInfo, itemInfo, tb_get_qr, tb_searchItem, close_driver, tb_get_cookie
+from .Spider.spiengine import queryInfo, itemInfo, tb_get_qr, tb_searchItem, close_driver, tb_get_cookie, jd_get_cookie, jd_searchItem, jd_get_qr
 
 import json
 
@@ -95,7 +95,9 @@ def checkLoginState(request):
         data={
             'isLogged': True,
             'userName': current_user.first_name,
-            'userEmail': current_user.username
+            'userEmail': current_user.username,
+            'userTBLogged': (current_user.profile.user_tb_token != None),
+            'userJDLogged': (current_user.profile.user_jd_token != None),
         }
         return HttpResponse(json.dumps(data))
 
@@ -106,6 +108,11 @@ def logout(request):
 def tb_get_qrcode(request):
     print("GET QR")
     img = tb_get_qr()
+    return JsonResponse({'status': 'success', 'img':img})
+
+def jd_get_qrcode(request):
+    print("GET QR")
+    img = jd_get_qr()
     return JsonResponse({'status': 'success', 'img':img})
 
 def fetchItem(request):
@@ -122,9 +129,13 @@ def fetchItem(request):
         jd_cookie = request.user.profile.user_jd_token
         if (tb_cookie is None) and (jd_cookie is None):
             return HttpResponse(json.dumps({"state":"notlogin"}))
+        res1=[]
+        res2=[]
         if(tb_cookie != ""):
-            res = tb_searchItem(q,tb_cookie)
-
+            res1 = tb_searchItem(q,tb_cookie)
+        if(jd_cookie != ""):
+            res2 = jd_searchItem(q,jd_cookie)
+        res = res1+res2
         keywordInfo = saveSearchResult(res, query_name)
 
 
@@ -137,6 +148,7 @@ def fetchItem(request):
     return HttpResponse(json.dumps(ret))
 
 
+
 def shut_driver(request):
     close_driver()
     return JsonResponse({'status': 'success'})
@@ -145,6 +157,16 @@ def tb_cookie(request):
     cookie = tb_get_cookie()
     user_prof = request.user.profile  # 假设 request.user 已登录
     user_prof.user_tb_token = cookie
+    user_prof.save()
+    if cookie != "":
+        return JsonResponse({'status':'success'})
+    else:
+        return JsonResponse({'status':'failure'})
+
+def jd_cookie(request):
+    cookie = jd_get_cookie()
+    user_prof = request.user.profile  # 假设 request.user 已登录
+    user_prof.user_jd_token = cookie
     user_prof.save()
     if cookie != "":
         return JsonResponse({'status':'success'})

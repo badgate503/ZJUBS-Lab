@@ -59,7 +59,7 @@ def saveSearchResult(result, resultKeyWord):
                 if(collector.need_notify):
                     notify_list.append(collector.user_profile.username)
             sendMail("比比价降价通知","您关注的商品【"+resultKeyWord+"】降价了！最新价格为 ¥"+str(minPrice/100)+"，🔗：https:"+minPriceItem.link,notify_list)
-            keyword_general_record.save()
+            keyword_general_record[0].save()
     else:
         gen_rec = product_keyword_general(keyword_name=resultKeyWord, latest_keyword_info=ele_key, lowest=minPrice, lowest_link=minPriceItem.link)
         gen_rec.save()

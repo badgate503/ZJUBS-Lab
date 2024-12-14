@@ -6,3 +6,10 @@
     display: flex;
     flex-direction: row;
 }
+.login-state{
+    display: flex;
+    flex-direction: row;
+    margin-left:2px;
+    margin-bottom: 5px;
+
+}
