@@ -28,7 +28,7 @@ export default {
     </div>
 
   <div class="list-item" v-for="item in info.list">
-    <el-link type="primary" @click="this.fatherMethod(item)">{{item}}</el-link>
+    <el-tag size="large" type="primary" @click="this.fatherMethod(item)">{{item}}</el-tag>
   </div>
   </div>
 </template>
@@ -53,5 +53,22 @@ export default {
 }
 .list-item{
   margin-left: 10px;
+}
+.list-item > :first-child{
+  margin-top: 10px;
+}
+
+@media(max-width: 767px) {
+  .list-cont{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 90%;
+    margin-top: 10px;
+  }
+  .list-item > :first-child{
+    margin-top: 10px;
+    height: 50px;
+  }
 }
 </style>

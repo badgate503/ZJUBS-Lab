@@ -33,7 +33,7 @@
   <el-dialog
       v-model="showDetail"
       :title="'“'+info.keyInfo.keyword_name+'“的商品信息'"
-      width="800"
+      width="95%"
       :before-close="handleCancelLoginTaobao"
       style="display: flex; flex-direction: column"
   >
@@ -64,10 +64,15 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-text style="margin-right:10px;">邮件通知价格更新</el-text>
-        <el-switch style="margin-right:10px;" size="large" v-model="info.need_notify" @change="onEditNeedNotify"></el-switch>
-        <el-button  type="primary" @click="gotoLink">去往最低价商品购买页</el-button>
-        <el-button @click="showDetail=false">关闭</el-button>
+        <div class="switch-cont">
+          <el-text style="margin-right:10px;">邮件通知价格更新</el-text>
+          <el-switch  size="large" v-model="info.need_notify" @change="onEditNeedNotify"></el-switch>
+        </div>
+        <div>
+          <el-button  type="primary" @click="gotoLink">去往最低价商品购买页</el-button>
+          <el-button @click="showDetail=false">关闭</el-button>
+        </div>
+
       </div>
     </template>
   </el-dialog>
@@ -120,7 +125,9 @@ export default {
             type: 'value'
           },
         legend: {
-          data: ['淘宝均价变化','京东均价变化','最低价格变化']
+          data: ['淘宝均价变化','京东均价变化','最低价格变化'],
+          right: '10',
+          top: '20'
         },
           series: [
             {
@@ -299,5 +306,35 @@ export default {
   flex-direction: row;
   align-items: center;
   justify-content: flex-end;
+}
+
+.switch-cont > :last-child{
+  margin-right: 20px;
+}
+
+@media (max-width: 860px){
+
+}
+
+@media (max-width: 808px){
+  .operations{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .price-detail{
+    font-size: large;
+    color: #cf2020;
+    margin-top: 10px;
+    margin-right: 10px;
+  }
+  .dialog-footer{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .switch-cont > :last-child{
+    margin-right: 0px;
+  }
 }
 </style>

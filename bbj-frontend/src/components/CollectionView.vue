@@ -81,4 +81,17 @@ export default {
   margin-top: 50px;
 }
 
+@media (max-width: 1250px){
+  .panel-cont{
+    width: 45%;
+  }
+}
+
+@media (max-width: 808px){
+  .panel-cont{
+    width: 95%;
+  }
+
+}
+
 </style>

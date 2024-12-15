@@ -57,9 +57,11 @@ export default {
 <style scoped>
 .img-cont{
   width: 100%;
+
 }
 .img-cont img{
   width: 100%;
+
 }
 
 .coll-container{
@@ -104,4 +106,18 @@ export default {
 .operations{
   margin-top:10px;
 }
+
+@media(max-width: 767px) {
+  .coll-container{
+    width: 360px;
+  }
+  .img-cont{
+    width: 100%;
+    height: auto;
+  }
+  .img-cont img{
+
+  }
+}
+
 </style>

@@ -52,3 +52,18 @@
 .inputhint{
     margin-left: 18px;
 }
+
+@media(max-width: 767px) {
+    .loginPanel{
+        background-color: #FFFFFF;
+        width:90%;
+        height:80vh;
+        min-height: 500px;
+        border-radius: 20px;
+        display: flex;
+        margin-top: 10vh;
+        margin-left: 7vw;
+        margin-bottom: 10vh;
+        box-shadow: 0.3em 0.3em 1em rgb(0 0 0 / 20%);
+    }
+}

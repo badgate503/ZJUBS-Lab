@@ -21,7 +21,6 @@ import ItemList from "./ItemList.vue";
               class="search-bar-bar"
               @click="onSearch"
               v-model="searchQuery"
-              style="width: 600px"
               size="large"
               clearable
               placeholder="搜一搜"
@@ -39,21 +38,7 @@ import ItemList from "./ItemList.vue";
       <a class="title-text">"{{searchQuery}}"的搜索结果</a>
     </div>
 
-    <div class="control-box">
-      <div class="swi-cont">
-        <el-text size="large">价格升序</el-text>
-        <el-switch style="margin-left: 10px;" v-model="price_asc" @change="onSort"/>
-      </div>
-      <div class="swi-cont">
-        <el-text size="large">显示淘宝结果</el-text>
-        <el-switch style="margin-left: 10px;" v-model="showTBRes" @change="onSort"/>
-      </div>
-      <div class="swi-cont">
-        <el-text size="large">显示京东结果</el-text>
-        <el-switch style="margin-left: 10px;" v-model="showJDRes" @change="onSort"/>
-      </div>
 
-    </div>
     <div class="control-box">
       <div class="info-cont">
         <el-text size="large">淘宝平均价格</el-text>
@@ -77,7 +62,7 @@ import ItemList from "./ItemList.vue";
         <el-text>获取淘宝商品{{QueryResInfo.TBcount}}项; 京东商品{{QueryResInfo.JDcount}}项; 搜索结果更新时间:{{QueryResInfo.updateTime}}</el-text>
       </div>
       </div>
-    <div class="control-box">
+    <div class="control-box-1">
 
       <div class="control-btn-box">
         <el-button type="primary" @click="onSearchSubmit(true)">重新搜索</el-button>
@@ -86,9 +71,24 @@ import ItemList from "./ItemList.vue";
         <el-button type="primary" @click="onFavorKeyword"><ElIcon style="margin-right: 5px;"><Star/></ElIcon>收藏关键词</el-button>
       </div>
     </div>
+      <div class="control-box">
+        <div class="swi-cont">
+          <el-text size="large">价格升序</el-text>
+          <el-switch style="margin-left: 10px;" v-model="price_asc" @change="onSort"/>
+        </div>
+        <div class="swi-cont">
+          <el-text size="large">显示淘宝结果</el-text>
+          <el-switch style="margin-left: 10px;" v-model="showTBRes" @change="onSort"/>
+        </div>
+        <div class="swi-cont">
+          <el-text size="large">显示京东结果</el-text>
+          <el-switch style="margin-left: 10px;" v-model="showJDRes" @change="onSort"/>
+        </div>
+
+      </div>
     </div>
     </el-collapse-transition>
-    <el-divider style="margin-top: 60px" ></el-divider>
+    <el-divider class="el-div-d"></el-divider>
     <transition name="el-fade-in">
       <div v-show="!logoShow">
 
@@ -307,10 +307,16 @@ export default {
 .control-box{
   margin-top: 20px;
   display: flex;
+  width: 100%;
   flex-direction: row;
   justify-content: center;
 }
-
+.control-box-1{
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
 .search-bar-cont{
   display: flex;
   align-items: center;
@@ -342,12 +348,14 @@ export default {
 .info-cont{
   margin-left: 20px;
   margin-right: 20px;
-
 }
 .info-price-text{
   margin-left: 5px;
   font-size: 30px;
   color: #e11414
+}
+.el-div-d{
+  margin-top: 60px
 }
 .swi-cont{
   display: flex;
@@ -374,6 +382,120 @@ export default {
 .title-text{
   color:#e5633c;
   font-size: 40px;
+}
+
+.search-bar-cont > :first-child{
+  width: 600px;
+}
+
+@media (max-width: 1180px){
+  .item-container{
+    width:29%;
+    margin-left:10px
+  }
+}
+
+@media (max-width: 960px){
+  .item-container{
+    width:40%;
+    margin-left:10px
+  }
+}
+
+@media (max-width: 767px) {
+  .logo-search{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2vh;
+  }
+
+  .logo-img{
+    width: 20vw;
+
+    margin-bottom: 2vh;
+  }
+
+
+  .search-bar-cont > :first-child{
+    width: 200px;
+  }
+  .search-btn{
+    margin-left: 10px;
+    width: 100px;
+  }
+  .logo-img{
+    width: 50vw;
+  }
+  .el-div-d{
+    margin-top: 30px
+  }
+  .title-text{
+    padding-left: 20px;
+  }
+
+
+
+
+
+  .item-list{
+    display:flex;
+    flex-direction: row;
+    width: 100%;
+    flex-wrap: wrap;
+
+  }
+  .item-container{
+    width:70%;
+    margin-left:10px
+  }
+  .lists-cont{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+  }
+  .info-cont{
+    padding-right: 20px;
+
+  }
+  .info-price-text{
+    margin-left: 5px;
+    font-size: 30px;
+    color: #e11414
+  }
+  .swi-cont{
+    display: flex;
+    margin-right: 30px;
+    margin-left: 0px;
+    padding-left: 20px;
+    flex-direction: row;
+    align-items: center;
+    width: fit-content;
+  }
+  .control-box{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    flex-wrap: wrap;
+  }
+  .control-box-1{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .control-btn-box{
+    margin-right: 10px;
+  }
+  .control-btn-box > :first-child{
+    width: 100px;
+    height: 50px;
+  }
+
 }
 
 </style>

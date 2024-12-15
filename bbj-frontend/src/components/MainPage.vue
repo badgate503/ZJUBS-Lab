@@ -10,7 +10,7 @@
 
   >
     <el-menu-item index="/front" >
-      <el-icon><img alt="logo" src="../assets/logo.svg"></el-icon>
+      <el-icon><img style="width: 30px" alt="logo" src="../assets/logo.svg"></el-icon>
       <template #title>比比价主页</template>
     </el-menu-item>
     <el-menu-item index="/collect" >
@@ -74,7 +74,7 @@
   <el-dialog
       v-model="dialogVisible"
       :title="'登录'+name"
-      width="500"
+      width="90%"
       :before-close="handleCancelLoginTaobao"
   >
 
