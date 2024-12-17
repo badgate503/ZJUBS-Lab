@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "bbj",
-    'corsheaders'
+    'corsheaders',
+    'django_apscheduler'
 ]
 
 MIDDLEWARE = [
@@ -116,7 +117,7 @@ TIME_ZONE = "Asia/Shanghai"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -169,3 +170,8 @@ CORS_ALLOW_HEADERS = (
     # 额外允许的请求头
     'token',
 )
+
+APSCHEDULER_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
+
+# 任务超时时间（单位：秒）
+APSCHEDULER_RUN_NOW_TIMEOUT = 600

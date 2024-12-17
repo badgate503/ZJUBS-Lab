@@ -61,6 +61,8 @@ def register(request):
     password = json_result['pwd']
     nickname = json_result['nickname']
     try:
+        user_exist = User.objects.filter(first_name=nickname)
+        if(len(user_exist) != 0): return HttpResponse("duplicate")
         user = User.objects.create_user(username=username,password=password,first_name=nickname)
     except IntegrityError:
         data={
@@ -127,7 +129,7 @@ def fetchItem(request):
         q = queryInfo(queryNum=0, queryText=query_name)
         tb_cookie = request.user.profile.user_tb_token
         jd_cookie = request.user.profile.user_jd_token
-        if (tb_cookie is None) and (jd_cookie is None):
+        if (tb_cookie is None) or (jd_cookie is None):
             return HttpResponse(json.dumps({"state":"notlogin"}))
         res1=[]
         res2=[]
@@ -135,7 +137,14 @@ def fetchItem(request):
             res1 = tb_searchItem(q,tb_cookie)
         if(jd_cookie != ""):
             res2 = jd_searchItem(q,jd_cookie)
-        res = res1+res2
+        if(res1 != None and res2 != None):
+            res = res1+res2
+        elif res1 != None:
+            res = res1
+        elif res2 != None:
+            res = res2
+        else:
+            return HttpResponse("nores")
         keywordInfo = saveSearchResult(res, query_name)
 
 
@@ -176,7 +185,7 @@ def jd_cookie(request):
 def favorKey(request):
     json_result = json.loads(request.body)
     query_name = json_result['query_name']
-    exist_collect = collect_record.objects.filter(product_keyword=query_name)
+    exist_collect = collect_record.objects.filter(product_keyword=query_name, user_profile=request.user)
     if(len(exist_collect)!=0):
         return HttpResponse("exist")
     new_collect = collect_record(user_profile=request.user, product_keyword=query_name, need_notify=False)
@@ -186,7 +195,9 @@ def favorKey(request):
 def favorNotify(request):
     json_result = json.loads(request.body)
     query_name = json_result['query_name']
+
     new_need = json_result['new_need']
+    if new_need and (request.user.profile.user_jd_token == None or request.user.profile.user_tb_token == None): return HttpResponse("notalllogin")
     exist_collect = collect_record.objects.filter(user_profile=request.user, product_keyword=query_name)[0]
     exist_collect.need_notify = new_need
     exist_collect.save()

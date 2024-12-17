@@ -57,9 +57,6 @@ def tb_get_qr():
     global driver_not_close
     try:
         driver = webdriver.Remote(command_executor=selenium_grid_url, options=option)
-        # with open('./stealth.min.js') as f:
-        #     inject_js = f.read()
-        # driver.execute_script(inject_js)
         print("Selenium Starts")
 
         driver.get("https://www.taobao.com")
@@ -75,16 +72,6 @@ def tb_get_qr():
         print(encoded_png)
         print("QRCode OK")
         driver_not_close = True
-        # current_url = driver.current_url
-        # WebDriverWait(driver, 30, 1).until(EC.url_changes(current_url))
-        # driver.implicitly_wait(40)
-        # q = driver.find_element(By.ID, 'q')
-        # driver.save_screenshot("tb0.png")
-        # dictCookies = driver.get_cookies()
-        # jsonCookies = json.dumps(dictCookies)
-        # # 登录完成后,将cookies保存到本地文件
-        # with open("../cookies_tao.json", "w") as fp:
-        #     fp.write(jsonCookies)
     except Exception as e:
         print("Error occurs!")
         print(e)
@@ -102,7 +89,6 @@ def tb_get_cookie():
             WebDriverWait(driver, 30, 1).until(EC.url_changes(current_url))
             driver.implicitly_wait(200)
             q = driver.find_element(By.ID, 'q')
-            driver.save_screenshot("tb0.png")
             time.sleep(1)
             dictCookies = driver.get_cookies()
             jsonCookies = json.dumps(dictCookies)
@@ -183,27 +169,6 @@ def tb_searchItem(queryInfo, cookie):
             fetchItemList.append(itemInfo(link=parent_href, fromwhich="taobao", img=img_src, name=title_text, price=first_price).__dict__)
 
         return fetchItemList
-
-
-
-
-        # driver.implicitly_wait(10)
-        # itemList = driver.find_elements(By.XPATH, "//*[@id='content_items_wrapper']/div")
-        # driver.execute_script("window.scrollBy(0,600)")
-        # print("Item list fetched!")
-        #
-        # for item in tqdm(itemList):
-        #     driver.execute_script("window.scrollBy(0,120)")
-        #     driver.implicitly_wait(5)
-        #     link = item.get_attribute("href")
-        #     wait = WebDriverWait(driver, 10, 0.1)
-        #     img = item.find_element(By.XPATH, ".//div[1]/div[1]/div[1]/img[1]").get_attribute("src")
-        #     name = item.find_element(By.XPATH, ".//div[1]/div[1]/div[2]/div[1]/span").text
-        #     priceInt = item.find_element(By.XPATH, ".//div[1]/div[1]/div[4]/div[1]/span[1]").text
-        #     priceFloat = item.find_element(By.XPATH, ".//div[1]/div[1]/div[4]/div[1]/span[2]").text
-        #     fetchItemList.append(itemInfo(link=link, fromwhich="taobao", img=img,name=name,price=int(priceInt)*100+int(priceFloat[1:2])).__dict__)
-        # return fetchItemList
-
     except Exception as e:
         print("Error occurs!")
         print(e)
@@ -296,9 +261,6 @@ def jd_searchItem(queryInfo, cookie):
             driver.execute_script(js)
 
         html = driver.page_source
-
-
-        # 使用 BeautifulSoup 解析 HTML
         soup = BeautifulSoup(html, 'html.parser')
 
         product_divs = soup.find_all('div', class_='gl-i-wrap')
@@ -327,27 +289,6 @@ def jd_searchItem(queryInfo, cookie):
             except Exception as e:
                 print(f"Error processing product: {e}")
         return fetchItemList
-
-
-
-
-        # driver.implicitly_wait(10)
-        # itemList = driver.find_elements(By.XPATH, "//*[@id='content_items_wrapper']/div")
-        # driver.execute_script("window.scrollBy(0,600)")
-        # print("Item list fetched!")
-        #
-        # for item in tqdm(itemList):
-        #     driver.execute_script("window.scrollBy(0,120)")
-        #     driver.implicitly_wait(5)
-        #     link = item.get_attribute("href")
-        #     wait = WebDriverWait(driver, 10, 0.1)
-        #     img = item.find_element(By.XPATH, ".//div[1]/div[1]/div[1]/img[1]").get_attribute("src")
-        #     name = item.find_element(By.XPATH, ".//div[1]/div[1]/div[2]/div[1]/span").text
-        #     priceInt = item.find_element(By.XPATH, ".//div[1]/div[1]/div[4]/div[1]/span[1]").text
-        #     priceFloat = item.find_element(By.XPATH, ".//div[1]/div[1]/div[4]/div[1]/span[2]").text
-        #     fetchItemList.append(itemInfo(link=link, fromwhich="taobao", img=img,name=name,price=int(priceInt)*100+int(priceFloat[1:2])).__dict__)
-        # return fetchItemList
-
     except Exception as e:
         print("Error occurs!")
         print(e)

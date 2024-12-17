@@ -230,6 +230,11 @@ export default {
       }).then(res=>{
         if(res.data==="OK")
           ElMessage.success("成功修改")
+        else if(res.data==="notalllogin"){
+          ElMessage.error("淘宝或京东中有一项未登录！")
+          this.info.need_notify = false
+        }
+
       })
     },
     gotoLink(){

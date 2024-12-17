@@ -147,6 +147,7 @@ import axios from "axios";
 import "../assets/LoginPage.css";
 
 import Qs from 'qs';
+import {ElMessage} from "element-plus";
 
 
 export default {
@@ -243,19 +244,11 @@ export default {
         return
       }
 
-      ElMessageBox.prompt('一条包含验证码的邮件已发送至您的邮箱 '+this.logInfo.email, '输入验证码', {
-        confirmButtonText: 'OK',
-        cancelButtonText: 'Cancel',
-        inputPattern:
-            /^\d{6}$|^$/,
-        inputErrorMessage: '验证码为六位数字',
-      })
-      .then(({ value }) => {
+
         axios.post("/api/register",{
           "username":this.logInfo.email,
           "pwd":this.logInfo.password,
           "nickname":this.logInfo.nickname,
-          "verifyCode":`${value}`
         },{
           withCredentials: true,
           headers: {
@@ -263,6 +256,10 @@ export default {
             'X-CSRFTOKEN': this.$cookies.get("csrftoken")
           }
         }).then(response => {
+          if(response.data==="duplicate"){
+            ElMessage.error('昵称重复！')
+            return;
+          }
           if(response.data['isRegisterOK']) {
             ElMessage.success('成功注册')
             this.$router.push('/index')
@@ -270,10 +267,7 @@ export default {
             ElMessage.error('该邮箱已注册')
           }
         })
-      })
-      .catch(() => {
 
-      })
       /**/
     },
 

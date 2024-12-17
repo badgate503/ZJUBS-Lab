@@ -26,7 +26,6 @@
       <div class="pop">
       <div class="userInfoHolder">
 
-        <el-avatar :size="70" :src="circleUrl" />
 
         <div class="infoHolder">
           <div class="userName">
@@ -79,7 +78,7 @@
   >
 
     <div class="qr-cont">
-      <el-text size="large">请使用手机{{name}}扫码登录</el-text>
+      <el-text size="large">请使用手机{{name}}扫码登录(扫码后需等待一会)</el-text>
       <div  class ="qrcode">
         <el-image v-loading="QRLoading" :src="QRSrc" alt="QRcode" ></el-image>
       </div>
@@ -155,7 +154,6 @@ import axios from "axios";
 import "../assets/MainPage.css";
 import UserView from "./UserView.vue";
 import {getCurrentUser} from "../utils.js";
-import {ElMessage} from "element-plus";
 
 export default {
   components: {UserView},
